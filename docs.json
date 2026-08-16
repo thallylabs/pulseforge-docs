@@ -32,6 +32,7 @@
         {
           "group": "Client surfaces",
           "pages": [
+            "http-server",
             "server-setup",
             "components",
             "customization",
