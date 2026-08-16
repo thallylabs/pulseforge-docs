@@ -1,49 +1,35 @@
 ---
 title: API overview
 navTitle: Overview
-description: What this API reference covers and how to try every request live.
+description: Read public status and manage incident timelines through the Pulseforge API.
 ---
 
-This reference documents the Sample Posts API — a small, working API backed by
-the public [JSONPlaceholder](https://jsonplaceholder.typicode.com) service.
-Every endpoint page has a **Send** button that runs the real request from your
-browser, so you can inspect live responses before writing a line of code.
+The Pulseforge Events API exposes one public status resource and authenticated
+incident mutations. Use the same contracts through HTTP or the browser SDK.
 
 ## Base URL
 
-All requests use the same base URL:
-
 ```text
-https://jsonplaceholder.typicode.com
+https://status.example.com
 ```
+
+Replace the example host with your deployed Pulseforge origin.
 
 ## Try your first request
 
 <Steps>
-  <Step title="Open an endpoint">
-    Pick **Get a post** from the Posts group in the sidebar.
+  <Step title="Open the status endpoint">
+    Select **Read the current public status** from the Status group.
   </Step>
-  <Step title="Send it">
-    Keep the default id of `1` and press **Send**. The response panel shows a
-    real `200` with the post body.
+  <Step title="Send the request">
+    The response reports the overall service state and active incidents.
   </Step>
-  <Step title="Change the input">
-    Try an id above `100` to see the API's `404` behavior.
+  <Step title="Authenticate mutations">
+    Configure a bearer token before opening or updating an incident.
   </Step>
 </Steps>
 
-Writes are safe to experiment with: the demo server accepts `POST` requests
-and echoes the created resource back with a generated id without storing it.
-
-## Make this reference yours
-
-This sample exists so the reference has something real to show. To document
-your own API, replace `openapi.yaml` at the repository root with your
-specification — the endpoint pages, navigation, and playground regenerate from
-it on the next publish.
-
-<Note type="info" title="Keep the overview pages">
-  Readers orient faster when a reference opens with what the API does, how to
-  authenticate, and one runnable request. Rewrite this page and
-  [Authentication](/api/authentication) for your API instead of deleting them.
+<Note type="warning" title="Protect management tokens">
+  Never expose an incident-management token in the status widget or other
+  customer-facing JavaScript.
 </Note>

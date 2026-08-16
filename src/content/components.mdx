@@ -1,45 +1,27 @@
 ---
-title: Components
-description: Use focused MDX components to make complex instructions easier to follow.
+title: Browser SDK
+description: Call Pulseforge through a typed client in browser or server JavaScript.
 ---
 
-Use a component when it clarifies a choice, sequence, status, or optional detail.
-Plain prose should remain the default.
+The browser SDK mirrors the HTTP API while preserving Pulseforge request and
+response types.
 
-## Show equivalent paths
+## Create a client
 
-<Tabs>
-  <Tab title="npm">
-    ```bash
-    npm install your-package
-    ```
-  </Tab>
-  <Tab title="pnpm">
-    ```bash
-    pnpm add your-package
-    ```
-  </Tab>
-  <Tab title="yarn">
-    ```bash
-    yarn add your-package
-    ```
-  </Tab>
-</Tabs>
+```ts
+import { createPulseforgeClient } from "@pulseforge/events/sdk";
 
-## Reveal detail when it matters
+const pulseforge = createPulseforgeClient({
+  baseUrl: "https://status.example.com",
+  token: process.env.PULSEFORGE_TOKEN,
+});
+```
 
-<Accordion title="Where should advanced configuration live?">
-  Keep the recommended path visible. Move optional detail here so new readers
-  can continue without hiding information from experienced users.
-</Accordion>
+Omit `token` for calls that only read public status.
 
-## Communicate status
+## Incident methods
 
-<Badge variant="success">Stable</Badge>{" "}
-<Badge variant="warning">Beta</Badge>{" "}
-<Badge variant="info">New</Badge>
-
-<Tip>
-  Choose the lightest component that improves comprehension. A page should not
-  look like a component catalogue unless that is its purpose.
-</Tip>
+- `getStatus()` reads public service status.
+- `createIncident(input)` opens an incident.
+- `addIncidentUpdate(id, input)` extends its timeline.
+- `resolveIncident(id)` marks it resolved.

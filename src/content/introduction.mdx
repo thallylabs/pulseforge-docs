@@ -1,45 +1,45 @@
 ---
-title: Introduction
-description: Give readers a clear path from their first question to a result they can verify.
+title: Pulseforge Events
+description: Publish service status, manage incident timelines, and embed current availability.
 mode: home
 ---
 
 <Hero
-  title="Build documentation around the reader"
-  subtitle="Start with a useful first result, organize what follows, and publish every format from one reviewable source."
-  primaryLabel="Get started"
+  title="Incident communication without the glue code"
+  subtitle="Publish status, coordinate incident updates, and keep customer-facing surfaces current through one typed API."
+  primaryLabel="Open an incident"
   primaryHref="/quickstart"
-  secondaryLabel="Publish your docs"
-  secondaryHref="/guides/create-a-site"
+  secondaryLabel="Explore the API"
+  secondaryHref="/api"
 />
 
-## Build the reader journey
+## One incident model, every customer surface
 
-Begin with the task that brings most readers to your documentation, then make
-the next useful step obvious.
+Pulseforge Events provides a fetch-compatible server, a typed browser SDK, and
+a dependency-free status widget. Incident state flows through the same public
+contracts on every surface.
 
 <CardGroup cols="2">
-  <Card title="Write your quickstart" icon="party-horn" href="/quickstart">
-    Turn prerequisites, setup, one realistic task, and verification into a short path.
+  <Card title="Open an incident" icon="party-horn" href="/quickstart">
+    Create an incident and publish the first timeline update.
   </Card>
-  <Card title="Organize your navigation" icon="grid-round" href="/customization">
-    Group related tasks and references around how people use your product.
+  <Card title="Use the browser SDK" icon="grid-round" href="/components">
+    Call the Pulseforge API with typed request and response objects.
   </Card>
-  <Card title="Document your API" icon="code-simple" href="/api">
-    Replace `openapi.yaml` to publish browsable endpoint docs with a live playground.
+  <Card title="Explore the API" icon="code-simple" href="/api">
+    Review every status and incident endpoint from the OpenAPI reference.
   </Card>
-  <Card title="Learn the Thally workflow" icon="wrench" href="/guides/create-a-site">
-    Create, publish, and update sites from the Cloud dashboard, the CLI, or your AI tools.
+  <Card title="Embed status" icon="wrench" href="/customization">
+    Add the `pulseforge-status` custom element to a customer-facing page.
   </Card>
 </CardGroup>
 
-## Publish from one source
+## Authentication
 
-Thally turns the same reviewed content into HTML, search, agent discovery files,
-Markdown mirrors, and a read-only MCP surface — so people and AI tools read the
-same, current answer. Add only the locales your readers need.
+The status endpoint is public. Incident mutations require a bearer token and
+should run only from trusted server-side code.
 
-<Note type="info" title="Start with the product, not the template">
-  Replace this page with the questions, terminology, and workflows your readers
-  already use. Keep `docs.json` focused on the path between those tasks.
+<Note type="info" title="Reference implementation">
+  The bundled store is in-memory. Supply durable storage before using
+  Pulseforge in a production incident workflow.
 </Note>

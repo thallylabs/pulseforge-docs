@@ -17,7 +17,7 @@
   },
   "navbar": {
     "primary": {
-      "label": "Get started",
+      "label": "Open an incident",
       "href": "/quickstart"
     }
   },
@@ -26,25 +26,12 @@
       "tab": "Get started",
       "groups": [
         {
-          "group": "Get started",
+          "group": "Pulseforge Events",
           "pages": ["introduction", "quickstart"]
         },
         {
-          "group": "Design your docs",
+          "group": "Client surfaces",
           "pages": ["components", "customization"]
-        }
-      ]
-    },
-    {
-      "tab": "Guides",
-      "groups": [
-        {
-          "group": "Work with Thally",
-          "pages": [
-            "guides/create-a-site",
-            "guides/work-with-the-cli",
-            "guides/connect-ai-tools"
-          ]
         }
       ]
     },

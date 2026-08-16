@@ -1,47 +1,49 @@
 ---
-title: Quickstart
-description: Guide a new reader through one useful workflow and show them how to verify it.
+title: Open your first incident
+description: Install the Pulseforge SDK, create an incident, and verify public status.
 ---
 
-A strong quickstart produces one meaningful result. Replace the placeholders
-below with the shortest supported path for your product.
+This quickstart opens an incident through the typed SDK and confirms that it is
+visible through the public status endpoint.
 
 ## Before you begin
 
-List only the requirements needed for this workflow:
-
-- An account or credential, when required
-- A supported runtime, device, browser, or operating system
-- Permission to create or change the resource used in the example
+- Node.js 20 or newer
+- A running Pulseforge server
+- A bearer token allowed to manage incidents
 
 <Steps>
-  <Step title="Install the required tool">
-    Give readers one recommended installation command.
-
+  <Step title="Install the SDK">
     ```bash
-    npm install your-package
+    npm install @pulseforge/events
     ```
   </Step>
-  <Step title="Add the minimum configuration">
-    Include only the values needed for the first successful run.
+  <Step title="Create a client">
+    ```ts
+    import { createPulseforgeClient } from "@pulseforge/events/sdk";
 
-    ```bash
-    your-cli init
+    const pulseforge = createPulseforgeClient({
+      baseUrl: "https://status.example.com",
+      token: process.env.PULSEFORGE_TOKEN,
+    });
     ```
   </Step>
-  <Step title="Complete the first task">
-    Use a realistic example that produces an observable result.
-
-    ```bash
-    your-cli start
+  <Step title="Open an incident">
+    ```ts
+    const incident = await pulseforge.createIncident({
+      title: "Delayed event delivery",
+      severity: "degraded",
+      serviceIds: ["events-api"],
+    });
     ```
   </Step>
   <Step title="Verify the result">
-    State exactly what the reader should see and how to recover when it does not appear.
+    Call `pulseforge.getStatus()`. The response reports `degraded` and includes
+    the incident in `activeIncidents`.
   </Step>
 </Steps>
 
-## Choose the next task
+## Continue the timeline
 
-Link to the guide that naturally follows this result. Avoid ending the reader’s
-journey with a generic list of every feature.
+Use `addIncidentUpdate` as work progresses, then call `resolveIncident` when
+the affected services are healthy.

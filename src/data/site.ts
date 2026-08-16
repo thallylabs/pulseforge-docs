@@ -160,10 +160,10 @@ const brandPresets: Record<BrandPresetKey, BrandConfig> = {
 const brandPreset: BrandPresetKey = 'primary'
 
 export const siteConfig: SiteConfig = {
-  name: 'Documentation',
+  name: 'Pulseforge Events',
   description:
-    'Clear, task-focused guidance for building with the product.',
-  repoUrl: '',
+    'Incident communication API, browser SDK, and embeddable status widgets.',
+  repoUrl: 'https://github.com/kenny-io/pulseforge-docs',
   links: [
     { label: 'Get started', href: '/quickstart' },
     { label: 'Changelog', href: '/changelog' },
