@@ -1,0 +1,153 @@
+---
+title: Alert rules
+description: Route incident events to email or webhook destinations with reusable alert rules.
+---
+
+Alert rules route incident events to email or webhook destinations, decoupling your incident creation logic from notification infrastructure.
+
+## What are alert rules?
+
+A rule selects which incident events trigger notifications (for example,
+`incident.opened` or `incident.resolved`), specifies where to send them (email
+or webhook), and can include a delivery cooldown to reduce alert fatigue.
+
+Each rule is independent, reusable, and available through the REST API and typed SDK methods.
+
+## Create a rule
+
+Use the SDK to set up a rule that sends new incidents to a webhook:
+
+```ts
+import { createPulseforgeClient } from "@pulseforge/events/sdk";
+
+const pulseforge = createPulseforgeClient({
+  baseUrl: "https://status.example.com",
+  token: process.env.PULSEFORGE_TOKEN,
+});
+
+const rule = await pulseforge.createAlertRule({
+  name: "Critical incident webhook",
+  eventTypes: ["incident.opened"],
+  destination: {
+    kind: "webhook",
+    target: "https://alerts.internal.example.com/incidents",
+  },
+  cooldownSeconds: 300,
+});
+```
+
+## Destination types
+
+### Email
+
+Send alerts to a single email address:
+
+```ts
+destination: {
+  kind: "email",
+  target: "team@example.com",
+}
+```
+
+### Webhook
+
+Webhook destinations must use HTTPS:
+
+```ts
+destination: {
+  kind: "webhook",
+  target: "https://alerts.internal.example.com/incidents",
+}
+```
+
+## Manage rules
+
+### List all rules
+
+```ts
+const rules = await pulseforge.listAlertRules();
+```
+
+### Get a specific rule
+
+```ts
+const rule = await pulseforge.getAlertRule(ruleId);
+```
+
+### Update a rule
+
+Change the destination, cooldown, or pause delivery without recreating it:
+
+```ts
+await pulseforge.updateAlertRule(ruleId, {
+  destination: {
+    kind: "email",
+    target: "new-team@example.com",
+  },
+  isEnabled: true,
+});
+```
+
+### Delete a rule
+
+```ts
+await pulseforge.deleteAlertRule(ruleId);
+```
+
+## Test a rule
+
+The reference store records a synthetic successful delivery so you can verify
+rule configuration and delivery-history handling. A production adapter should
+replace this simulation with a real destination check:
+
+```ts
+const result = await pulseforge.testAlertRule(ruleId);
+console.log(result.delivery.status); // "delivered" in the reference store
+```
+
+## View delivery history
+
+Inspect the most recent delivery attempts for a rule:
+
+```ts
+const deliveries = await pulseforge.listAlertDeliveries(ruleId);
+deliveries.forEach((d) => {
+  console.log(`${d.eventType}: ${d.status} at ${d.attemptedAt}`);
+});
+```
+
+## Embed the alert center
+
+Display alert rules in your operator dashboard using the `<pulseforge-alert-center>` web component. Register it once in your app:
+
+```html
+<script type="module">
+  import { registerPulseforgeAlertCenterWidget } from "@pulseforge/events";
+  registerPulseforgeAlertCenterWidget();
+</script>
+```
+
+Then add the component to your page and assign an authenticated client:
+
+```html
+<pulseforge-alert-center id="alerts"></pulseforge-alert-center>
+
+<script type="module">
+  import { createPulseforgeClient } from "@pulseforge/events/sdk";
+
+  const client = createPulseforgeClient({
+    baseUrl: "https://status.example.com",
+    token: operatorSession.accessToken,
+  });
+
+  document.getElementById("alerts").client = client;
+</script>
+```
+
+The component displays the count of configured rules and exposes a `refresh()` method to reload them after mutations.
+
+<Note type="warning" title="Use only in an authenticated operator surface">
+  Do not persist an incident-management token in browser storage or expose it
+  through markup. Supply a short-lived operator credential from your existing
+  authenticated application session.
+</Note>

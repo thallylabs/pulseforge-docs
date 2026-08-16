@@ -1,6 +1,8 @@
 ---
 title: Pulseforge Events
-description: Publish service status, manage incident timelines, and embed current availability.
+description: >-
+  Publish service status, manage incident timelines, and embed current
+  availability.
 mode: home
 ---
 
@@ -20,11 +22,17 @@ a dependency-free status widget. Incident state flows through the same public
 contracts on every surface.
 
 <CardGroup cols="2">
+  <Card title="Deploy the server" icon="server" href="/http-server">
+    Set up the HTTP request handler for your runtime environment.
+  </Card>
   <Card title="Open an incident" icon="party-horn" href="/quickstart">
     Create an incident and publish the first timeline update.
   </Card>
   <Card title="Use the browser SDK" icon="grid-round" href="/components">
     Call the Pulseforge API with typed request and response objects.
+  </Card>
+  <Card title="Route alerts" icon="bell" href="/alert-rules">
+    Set up rules to send incident events to email or webhook destinations.
   </Card>
   <Card title="Explore the API" icon="code-simple" href="/api">
     Review every status and incident endpoint from the OpenAPI reference.
@@ -40,6 +48,6 @@ The status endpoint is public. Incident mutations require a bearer token and
 should run only from trusted server-side code.
 
 <Note type="info" title="Reference implementation">
-  The bundled store is in-memory. Supply durable storage before using
-  Pulseforge in a production incident workflow.
+  The bundled store is in-memory. Supply durable storage before using Pulseforge
+  in a production incident workflow.
 </Note>

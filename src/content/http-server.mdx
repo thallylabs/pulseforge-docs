@@ -1,0 +1,87 @@
+---
+title: Deploy the HTTP handler
+description: Serve the Pulseforge API from a runtime that accepts Fetch API requests.
+---
+
+`createPulseforgeApp` returns a function that accepts a web-standard `Request`
+and returns a `Response`. Use it directly in a Fetch-compatible runtime or add
+an explicit adapter for your Node.js framework.
+
+## Create the handler
+
+```ts
+import { createPulseforgeApp, createPulseforgeStore } from "@pulseforge/events";
+
+const store = createPulseforgeStore([
+  { id: "api", name: "Events API", status: "operational" },
+  { id: "database", name: "Database", status: "operational" },
+]);
+
+const app = createPulseforgeApp({
+  store,
+  token: process.env.PULSEFORGE_TOKEN,
+});
+```
+
+Do not pass `app` directly to `node:http.createServer`: Node handlers receive
+`IncomingMessage` and `ServerResponse`, not Fetch API request objects. Convert
+those values through a tested adapter, or use a runtime with a native Fetch
+entry point.
+
+## Cloudflare Workers
+
+Create the handler inside `fetch` so the management token comes from a Worker
+secret rather than source code or a URL:
+
+```ts
+import { createPulseforgeApp, createPulseforgeStore } from "@pulseforge/events";
+
+interface Env {
+  PULSEFORGE_TOKEN: string;
+}
+
+export default {
+  fetch(request: Request, env: Env) {
+    const app = createPulseforgeApp({
+      store: createPulseforgeStore(),
+      token: env.PULSEFORGE_TOKEN,
+    });
+
+    return app(request);
+  },
+};
+```
+
+The included store is in-memory and does not provide durable Worker storage.
+Use a persistent store adapter before relying on it for production incidents.
+
+## Endpoints
+
+### Public status
+
+- `GET /v1/status` — Read service status and active incidents without authentication.
+
+### Incident management
+
+- `POST /v1/incidents` — Create an incident.
+- `POST /v1/incidents/:id/updates` — Add a timeline update.
+- `PATCH /v1/incidents/:id/resolve` — Resolve an incident.
+
+### Alert rules
+
+- `GET /v1/alert-rules` — List rules.
+- `POST /v1/alert-rules` — Create a rule.
+- `GET /v1/alert-rules/:id` — Fetch a rule.
+- `PATCH /v1/alert-rules/:id` — Update a rule.
+- `DELETE /v1/alert-rules/:id` — Delete a rule.
+- `POST /v1/alert-rules/:id/test` — Record a synthetic delivery test.
+- `GET /v1/alert-rules/:id/deliveries` — List delivery history.
+
+Except for public status, every operation requires:
+
+```http
+Authorization: Bearer YOUR_TOKEN
+```
+
+Use the [Browser SDK](/components) to call the same operations with typed input
+and output, or review the generated [API reference](/api) for every endpoint.

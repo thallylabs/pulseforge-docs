@@ -31,7 +31,13 @@
         },
         {
           "group": "Client surfaces",
-          "pages": ["components", "customization"]
+          "pages": [
+            "http-server",
+            "server-setup",
+            "components",
+            "customization",
+            "alert-rules"
+          ]
         }
       ]
     },

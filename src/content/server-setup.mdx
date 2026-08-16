@@ -1,0 +1,81 @@
+---
+title: Server-side setup
+description: Create and manage incident state using the Pulseforge store.
+---
+
+## Create a store
+
+The `createPulseforgeStore` function initializes in-memory incident and alert rule state. Use it on your backend to manage the complete lifecycle of incidents, updates, and alert routing:
+
+```ts
+import { createPulseforgeStore } from "@pulseforge/events";
+
+const store = createPulseforgeStore([
+  { id: "api", name: "Events API", status: "operational" },
+  { id: "db", name: "Database", status: "operational" },
+]);
+```
+
+By default, `createPulseforgeStore` initializes one service called "Events API". Pass an array of services to define your status page structure.
+
+## Incident operations
+
+### Create an incident
+
+```ts
+const incident = store.createIncident({
+  title: "High delivery latency detected",
+  severity: "degraded",
+  serviceIds: ["api"],
+});
+```
+
+### Add timeline updates
+
+```ts
+store.addIncidentUpdate(incident.id, {
+  message: "Scaling database connections in progress",
+  status: "investigating",
+});
+```
+
+### Resolve an incident
+
+```ts
+store.resolveIncident(incident.id);
+```
+
+## Check system status
+
+```ts
+const status = store.getStatus();
+console.log(status.status); // "operational", "degraded", or "outage"
+console.log(status.activeIncidents); // incidents not yet resolved
+```
+
+## Alert rules
+
+The store extends the alert rule registry, so you can manage rules through the same interface:
+
+```ts
+const rule = store.createAlertRule({
+  name: "Page on critical incidents",
+  eventTypes: ["incident.opened"],
+  destination: {
+    kind: "webhook",
+    target: "https://alerts.example.com/critical",
+  },
+  cooldownSeconds: 300,
+});
+
+const allRules = store.listAlertRules();
+const testResult = store.testAlertRule(rule.id);
+```
+
+See [Alert rules](/alert-rules) for the full reference of rule management methods.
+
+<Note type="warning" title="In-memory storage">
+  The store is in-memory only. Incidents and rules are lost when the process
+  restarts. For production use, persist store data to a durable backend and
+  restore it on startup.
+</Note>
