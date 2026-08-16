@@ -163,7 +163,7 @@ export const siteConfig: SiteConfig = {
   name: 'Pulseforge Events',
   description:
     'Incident communication API, browser SDK, and embeddable status widgets.',
-  repoUrl: 'https://github.com/kenny-io/pulseforge-docs',
+  repoUrl: 'https://github.com/thallylabs/pulseforge-docs',
   links: [
     { label: 'Get started', href: '/quickstart' },
     { label: 'Changelog', href: '/changelog' },
