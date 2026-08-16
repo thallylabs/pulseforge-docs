@@ -19,9 +19,22 @@ const pulseforge = createPulseforgeClient({
 
 Omit `token` for calls that only read public status.
 
-## Incident methods
+## Status and incidents
 
 - `getStatus()` reads public service status.
 - `createIncident(input)` opens an incident.
 - `addIncidentUpdate(id, input)` extends its timeline.
 - `resolveIncident(id)` marks it resolved.
+
+## Alert rules
+
+Alert rules route incident events to email or webhook destinations. See
+[Alert rules](/alert-rules) for full details and examples.
+
+- `listAlertRules()` returns all configured rules.
+- `getAlertRule(id)` fetches a single rule.
+- `createAlertRule(input)` creates a new rule.
+- `updateAlertRule(id, input)` modifies a rule.
+- `deleteAlertRule(id)` removes a rule.
+- `testAlertRule(id)` sends a synthetic event to verify the destination.
+- `listAlertDeliveries(id)` shows recent delivery attempts.

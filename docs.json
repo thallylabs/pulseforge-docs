@@ -31,7 +31,7 @@
         },
         {
           "group": "Client surfaces",
-          "pages": ["components", "customization"]
+          "pages": ["components", "customization", "alert-rules"]
         }
       ]
     },
