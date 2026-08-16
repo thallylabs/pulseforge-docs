@@ -7,7 +7,9 @@ Alert rules route incident events to email or webhook destinations, decoupling y
 
 ## What are alert rules?
 
-A rule selects which incident events trigger notifications (e.g., `incident.created` or `incident.resolved`), specifies where to send them (email or webhook), and can include a delivery cooldown to reduce alert fatigue.
+A rule selects which incident events trigger notifications (for example,
+`incident.opened` or `incident.resolved`), specifies where to send them (email
+or webhook), and can include a delivery cooldown to reduce alert fatigue.
 
 Each rule is independent, reusable, and available through the REST API and typed SDK methods.
 
@@ -25,7 +27,7 @@ const pulseforge = createPulseforgeClient({
 
 const rule = await pulseforge.createAlertRule({
   name: "Critical incident webhook",
-  eventTypes: ["incident.created"],
+  eventTypes: ["incident.opened"],
   destination: {
     kind: "webhook",
     target: "https://alerts.internal.example.com/incidents",
@@ -49,7 +51,7 @@ destination: {
 
 ### Webhook
 
-POST a JSON payload to an HTTPS URL. The payload includes the rule ID, event type, and incident details:
+Webhook destinations must use HTTPS:
 
 ```ts
 destination: {
@@ -94,11 +96,13 @@ await pulseforge.deleteAlertRule(ruleId);
 
 ## Test a rule
 
-Queue a synthetic event to verify your destination is reachable and properly configured:
+The reference store records a synthetic successful delivery so you can verify
+rule configuration and delivery-history handling. A production adapter should
+replace this simulation with a real destination check:
 
 ```ts
 const result = await pulseforge.testAlertRule(ruleId);
-console.log(result.status); // "delivered" or "failed"
+console.log(result.delivery.status); // "delivered" in the reference store
 ```
 
 ## View delivery history
@@ -133,7 +137,7 @@ Then add the component to your page and assign an authenticated client:
 
   const client = createPulseforgeClient({
     baseUrl: "https://status.example.com",
-    token: sessionStorage.getItem("token"),
+    token: operatorSession.accessToken,
   });
 
   document.getElementById("alerts").client = client;
@@ -141,3 +145,9 @@ Then add the component to your page and assign an authenticated client:
 ```
 
 The component displays the count of configured rules and exposes a `refresh()` method to reload them after mutations.
+
+<Note type="warning" title="Use only in an authenticated operator surface">
+  Do not persist an incident-management token in browser storage or expose it
+  through markup. Supply a short-lived operator credential from your existing
+  authenticated application session.
+</Note>

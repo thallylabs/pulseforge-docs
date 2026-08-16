@@ -1,136 +1,87 @@
 ---
-title: Deploy the HTTP server
-description: Set up the Pulseforge HTTP server to serve the status API and handle incident mutations.
+title: Deploy the HTTP handler
+description: Serve the Pulseforge API from a runtime that accepts Fetch API requests.
 ---
 
-The `createPulseforgeApp` function creates a fetch-compatible HTTP request handler that serves the complete Pulseforge REST API. Deploy it to any Node.js or edge runtime that supports the Fetch API.
+`createPulseforgeApp` returns a function that accepts a web-standard `Request`
+and returns a `Response`. Use it directly in a Fetch-compatible runtime or add
+an explicit adapter for your Node.js framework.
 
 ## Create the handler
 
-Pass a store and a bearer token to `createPulseforgeApp`:
-
 ```ts
-import { createPulseforgeStore, createPulseforgeApp } from "@pulseforge/events";
+import { createPulseforgeApp, createPulseforgeStore } from "@pulseforge/events";
 
 const store = createPulseforgeStore([
   { id: "api", name: "Events API", status: "operational" },
-  { id: "db", name: "Database", status: "operational" },
+  { id: "database", name: "Database", status: "operational" },
 ]);
 
 const app = createPulseforgeApp({
   store,
   token: process.env.PULSEFORGE_TOKEN,
 });
-
-export default { fetch: app };
 ```
 
-## Deploy to Node.js
+Do not pass `app` directly to `node:http.createServer`: Node handlers receive
+`IncomingMessage` and `ServerResponse`, not Fetch API request objects. Convert
+those values through a tested adapter, or use a runtime with a native Fetch
+entry point.
 
-Use any Node.js HTTP server library. Here's an example with `http`:
+## Cloudflare Workers
 
-```ts
-import { createServer } from "http";
-
-const server = createServer(app);
-server.listen(3000, () => {
-  console.log("Pulseforge API listening on http://localhost:3000");
-});
-```
-
-Or with a web framework like Express:
+Create the handler inside `fetch` so the management token comes from a Worker
+secret rather than source code or a URL:
 
 ```ts
-import express from "express";
+import { createPulseforgeApp, createPulseforgeStore } from "@pulseforge/events";
 
-const expressApp = express();
+interface Env {
+  PULSEFORGE_TOKEN: string;
+}
 
-expressApp.all("*", (req, res) => {
-  const fetchRequest = new Request(`http://localhost:3000${req.url}`, {
-    method: req.method,
-    headers: req.headers,
-    body: req.body ? JSON.stringify(req.body) : undefined,
-  });
-
-  app(fetchRequest)
-    .then((response) => {
-      res.status(response.status);
-      response.headers.forEach((value, key) => {
-        res.setHeader(key, value);
-      });
-      response.text().then((body) => {
-        res.send(body);
-      });
-    })
-    .catch((error) => {
-      res.status(500).json({ error: "Internal server error" });
+export default {
+  fetch(request: Request, env: Env) {
+    const app = createPulseforgeApp({
+      store: createPulseforgeStore(),
+      token: env.PULSEFORGE_TOKEN,
     });
-});
 
-expressApp.listen(3000);
+    return app(request);
+  },
+};
 ```
 
-## Deploy to Cloudflare Workers
-
-`createPulseforgeApp` returns a fetch handler compatible with Cloudflare Workers:
-
-```ts
-import { createPulseforgeStore, createPulseforgeApp } from "@pulseforge/events";
-
-export const onRequest = createPulseforgeApp({
-  store: createPulseforgeStore(),
-  token:
-    new URL(import.meta.url).searchParams.get("PULSEFORGE_TOKEN") ||
-    env.PULSEFORGE_TOKEN,
-});
-```
-
-Store the token in your environment variables and pass it to the handler.
+The included store is in-memory and does not provide durable Worker storage.
+Use a persistent store adapter before relying on it for production incidents.
 
 ## Endpoints
 
-The HTTP server exposes these endpoints:
-
 ### Public status
 
-- `GET /v1/status` — Read system status and active incidents (no auth required)
+- `GET /v1/status` — Read service status and active incidents without authentication.
 
 ### Incident management
 
-- `POST /v1/incidents` — Create an incident (requires auth)
-- `POST /v1/incidents/:id/updates` — Add a timeline update (requires auth)
-- `PATCH /v1/incidents/:id` — Resolve or escalate an incident (requires auth)
+- `POST /v1/incidents` — Create an incident.
+- `POST /v1/incidents/:id/updates` — Add a timeline update.
+- `PATCH /v1/incidents/:id/resolve` — Resolve an incident.
 
 ### Alert rules
 
-- `GET /v1/alert-rules` — List all rules (requires auth)
-- `POST /v1/alert-rules` — Create a rule (requires auth)
-- `GET /v1/alert-rules/:id` — Fetch a specific rule (requires auth)
-- `PATCH /v1/alert-rules/:id` — Update a rule (requires auth)
-- `DELETE /v1/alert-rules/:id` — Delete a rule (requires auth)
-- `POST /v1/alert-rules/:id/test` — Test a rule delivery (requires auth)
-- `GET /v1/alert-rules/:id/deliveries` — List delivery history (requires auth)
+- `GET /v1/alert-rules` — List rules.
+- `POST /v1/alert-rules` — Create a rule.
+- `GET /v1/alert-rules/:id` — Fetch a rule.
+- `PATCH /v1/alert-rules/:id` — Update a rule.
+- `DELETE /v1/alert-rules/:id` — Delete a rule.
+- `POST /v1/alert-rules/:id/test` — Record a synthetic delivery test.
+- `GET /v1/alert-rules/:id/deliveries` — List delivery history.
 
-## Authentication
+Except for public status, every operation requires:
 
-The public `/v1/status` endpoint requires no token. All other endpoints require a bearer token in the `Authorization` header:
-
-```bash
-curl https://status.example.com/v1/incidents \
-  -X POST \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Service outage",
-    "severity": "outage",
-    "serviceIds": ["api"]
-  }'
+```http
+Authorization: Bearer YOUR_TOKEN
 ```
 
-Use the typed SDK to manage authentication automatically—see [Browser SDK](/components) for details.
-
-## Next steps
-
-- Use the [Browser SDK](/components) to call the API from JavaScript
-- Set up [alert rules](/alert-rules) to route incident events
-- Embed the [status widget](/customization) on customer-facing pages
+Use the [Browser SDK](/components) to call the same operations with typed input
+and output, or review the generated [API reference](/api) for every endpoint.
